@@ -1,7 +1,6 @@
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.gridlayout import GridLayout
-from kivy.factory import Factory
 
 
 class CalendarWidget(Button):
@@ -19,6 +18,3 @@ class CalendarWidget(Button):
             self.popup.content = calendar_layout
 
         self.popup.open()
-
-
-Factory.register('CalendarWidget', cls=CalendarWidget)

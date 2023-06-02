@@ -1,0 +1,30 @@
+# screens/kv_files/main.kv
+<MainScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+
+        BoxLayout:
+            size_hint_y: 0.1
+            Button:
+                text: 'Add Habit'
+                on_release: calendar_widget.open_calendar()
+
+        BoxLayout:
+            orientation: 'horizontal'
+
+            BoxLayout:
+                size_hint_x: 0.2
+                orientation: 'vertical'
+                Label:
+                    text: 'See Your Habits'
+                # Add code for displaying habits from the database
+
+            BoxLayout:
+                size_hint_x: 0.8
+                CalendarWidget:
+                    id: calendar_widget
+
+        BoxLayout:
+            size_hint_y: 0.1
+            Button:
+                text: 'Settings'
