@@ -1,52 +1,64 @@
 from datetime import date
 from kivy.lang import Builder
 from kivy.metrics import dp
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.popup import Popup
-from kivy.uix.datepicker import DatePicker
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.label import MDLabel
+from kivymd.uix.button import MDFlatButton
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.snackbar import Snackbar
+# from kivymd.uix.picker import MDDatePickerDialog
 from kivymd.app import MDApp
 import psycopg2
+from kivymd.uix.pickers import MDTimePicker
 
 
 KV = '''
-BoxLayout:
-    orientation: "vertical"
-    padding: dp(16)
+MDScreen:
 
-    Label:
-        text: "Track Your Habits"
-        color: app.theme_cls.secondary_text_color
-        halign: "center"
-        font_size: "20sp"
-        size_hint_y: None
-        height: self.texture_size[1]
+    MDNavigationLayout:
 
-    TextInput:
-        id: habit_input
-        hint_text: "Enter a habit"
-        size_hint: None, None
-        width: dp(200)
-        pos_hint: {"center_x": 0.5}
-        multiline: False
+        MDScreenManager:
 
-    Button:
-        text: "Add Habit"
-        pos_hint: {"center_x": 0.5}
-        on_release: app.show_date_picker()
+            MDScreen:
 
-    ScrollView:
-        GridLayout:
-            id: habit_grid
-            cols: 1
-            size_hint_y: None
-            height: self.minimum_height
-            spacing: dp(8)
-            padding: dp(8)
+                BoxLayout:
+                    orientation: "vertical"
+                    padding: dp(16)
+
+                    MDLabel:
+                        text: "Track Your Habits"
+                        theme_text_color: "Secondary"
+                        halign: "center"
+                        font_style: "H4"
+                        size_hint_y: None
+                        height: self.texture_size[1]
+
+                    MDTextField:
+                        id: habit_input
+                        hint_text: "Enter a habit"
+                        size_hint: None, None
+                        width: dp(200)
+                        pos_hint: {"center_x": 0.5}
+                        multiline: False
+
+                    MDFlatButton:
+                        text: "Add Habit"
+                        pos_hint: {"center_x": 0.5}
+                        on_release: app.show_date_picker()
+
+                    ScrollView:
+                        GridLayout:
+                            id: habit_grid
+                            cols: 1
+                            size_hint_y: None
+                            height: self.minimum_height
+                            spacing: dp(8)
+                            padding: dp(8)
 '''
+
+
+class ContentNavigationDrawer(MDBoxLayout):
+    pass
 
 
 class HabitApp(MDApp):
@@ -57,23 +69,20 @@ class HabitApp(MDApp):
         return Builder.load_string(KV)
 
     def show_date_picker(self):
-        habit_text = self.root.ids.habit_input.text.strip()
-        if habit_text:
-            # Create a DatePicker popup
-            date_picker = DatePicker(on_save=self.on_date_save)
-            popup = Popup(title='Select Start Date', content=date_picker, size_hint=(None, None), size=(400, 400))
-            popup.open()
+        date_dialog = MDTimePicker()
+        date_dialog.bind(on_save=self.on_date_save)
+        date_dialog.open()
 
-    def on_date_save(self, instance, value, *args):
+    def on_date_save(self, instance, value, date_range):
         habit_text = self.root.ids.habit_input.text.strip()
         if habit_text:
-            habit_label = Label(
+            habit_label = MDLabel(
                 text=habit_text,
-                color=(0, 0, 1, 1),
+                theme_text_color="Primary",
                 size_hint_y=None,
                 height=dp(40),
                 valign="center",
-                font_size="16sp",
+                font_style="Subtitle1",
             )
             self.root.ids.habit_grid.add_widget(habit_label)
             self.root.ids.habit_input.text = ""
@@ -88,6 +97,8 @@ class HabitApp(MDApp):
             # Insert the habit into the database
             insert_habit(habit_text, value)
 
+            Snackbar(text=f"Habit '{habit_text}' added with start date: {value}").show()
+
     def save_habits(self):
         # Save the habits to a file or database
         with open("habits.txt", "w") as file:
@@ -99,7 +110,7 @@ def insert_habit(habit_name, start_date):
     connection = psycopg2.connect(
         host="localhost",
         port="5432",
-        database="habit_tracker",
+        database="habit tracker",
         user="postgres",
         password="postgres"
     )
